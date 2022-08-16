@@ -57,8 +57,8 @@
                 (merge
                   {:x           (:time item)
                    :y           (y-key item)
-                   :name        (if (> name-size 15)
-                                  (str (subs (name-key item) 0 15) "...") name)
+                   :name        (if (> name-size 25)
+                                  (str (subs (name-key item) 0 25) "...") name)
                    :connectgaps false
                    :fill        "tozeroy"
                    :type        "scatter"
