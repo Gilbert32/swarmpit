@@ -47,6 +47,11 @@
 
 ;; Retention Policy
 
+(defn create-a-month-rp
+  "Automatically delete resolution data from CQ that are older than 30 days"
+  []
+  (manage-doc "CREATE RETENTION POLICY a_month ON swarmpit DURATION 30d REPLICATION 1"))
+
 (defn create-a-day-rp
   "Automatically delete resolution data from CQ that are older than 24 hours"
   []
@@ -184,14 +189,14 @@
         GROUP BY task, service")))
 
 (defn read-service-stats
-  [services]
+  [services tp]
   (let [cond (->> services
                   (map #(str "service = '" % "'"))
                   (str/join " OR "))]
     (read-doc
       (str
         "SELECT cpu, memory
-          FROM swarmpit.a_day.downsampled_services
+          FROM swarmpit." (if  (= tp "monthly") "a_month" "a_day") ".downsampled_services
           WHERE " cond "
           GROUP BY service"))))
 

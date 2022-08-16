@@ -661,6 +661,17 @@
                              400 {:body        {:error string?}
                                   :description "Statistics disabled"}}
                  #?@(:clj [:handler handler/services-ts-cpu]))}]
+    ["/services/ts/cpu/monthly"
+     {:name    :services-ts-monthly-cpu
+      :swagger {:tags ["service"]}
+      :get     (array-map
+                 :summary "Services cpu monthly timeseries"
+                 :parameters {:header {:authorization string?}}
+                 :responses {200 {:body        [spec/service-stats]
+                                  :description "Success"}
+                             400 {:body        {:error string?}
+                                  :description "Statistics disabled"}}
+                 #?@(:clj [:handler handler/services-ts-cpu-monthly]))}]
     ["/services/ts/memory"
      {:name    :services-ts-memory
       :swagger {:tags ["service"]}
@@ -672,6 +683,17 @@
                              400 {:body        {:error string?}
                                   :description "Statistics disabled"}}
                  #?@(:clj [:handler handler/services-ts-memory]))}]
+    ["/services/ts/memory/monthly"
+     {:name    :services-ts-memory-monthly
+      :swagger {:tags ["service"]}
+      :get     (array-map
+                 :summary "Services ram timeseries"
+                 :parameters {:header {:authorization string?}}
+                 :responses {200 {:body        [spec/service-stats]
+                                  :description "Success"}
+                             400 {:body        {:error string?}
+                                  :description "Statistics disabled"}}
+                 #?@(:clj [:handler handler/services-ts-memory-monthly ]))}]
     ["/services/:id"
      {:name    :service
       :swagger {:tags ["service"]}

@@ -145,31 +145,31 @@
 
 (defn services-timeseries
   "Get last 15 services timeseries data based on type for last 24 hours"
-  [services-max-usage sort-by-type]
+  [services-max-usage sort-by-type tp]
   (map #(m/->task-ts %)
        (-> (influx/read-service-stats
              (->> services-max-usage
                   (sort-by sort-by-type)
                   (take-last 10)
                   (map :service)
-                  (into [])))
+                  (into [])) tp)
            (first)
            (get "series"))))
 
 (defn services-cpu-timeseries
   "Get services cpu timeseries data for last 24 hours"
-  []
+  [t]
   (let [services-max-usage (services-max-usage-memo)]
-    (services-timeseries services-max-usage :cpu)))
+    (services-timeseries services-max-usage :cpu t)))
 
 (defn services-memory-timeseries
   "Get services memory timeseries data for last 24 hours"
-  []
+  [t]
   (let [services-max-usage (services-max-usage-memo)]
-    (services-timeseries services-max-usage :memory)))
+    (services-timeseries services-max-usage :memory t)))
 
-(def services-cpu-timeseries-memo (memo/ttl services-cpu-timeseries :ttl/threshold 60000))
-(def services-memory-timeseries-memo (memo/ttl services-memory-timeseries :ttl/threshold 60000))
+(defn services-cpu-timeseries-memo [t] (memo/ttl services-cpu-timeseries t :ttl/threshold 60000))
+(defn services-memory-timeseries-memo [t] (memo/ttl services-memory-timeseries t :ttl/threshold 60000))
 
 (defn hosts-timeseries
   "Get hosts timeseries data for last 24 hours"

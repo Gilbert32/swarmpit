@@ -21,8 +21,10 @@
 (def plot-node-ram-id "nodeRamStats")
 
 (def plot-service-cpu-id "serviceCpuStats")
+(def plot-service-cpu-monthly-id "serviceCpuMonthlyStats")
 
 (def plot-service-ram-id "serviceRamStats")
+(def plot-service-ram-monthly-id "serviceRamStats")
 
 (defn node-cpu-plot [stats-ts]
   (plot/multi plot-node-cpu-id
@@ -76,7 +78,25 @@
                    (state/update-value [:services-ts-cpu] response state/form-value-cursor))
      :on-error   (fn [_])}))
 
+(defn- services-ts-cpu-monthly-handler
+  []
+  (ajax/get
+    (routes/path-for-backend :services-ts-monthly-cpu)
+    {:state      [:loading? :services-ts-monthly-cpu]
+     :on-success (fn [{:keys [response]}]
+                   (state/update-value [:services-ts-monthly-cpu] response state/form-value-cursor))
+     :on-error   (fn [_])}))
+
 (defn- services-ts-memory-handler
+  []
+  (ajax/get
+    (routes/path-for-backend :services-ts-memory)
+    {:state      [:loading? :services-ts-memory]
+     :on-success (fn [{:keys [response]}]
+                   (state/update-value [:services-ts-memory] response state/form-value-cursor))
+     :on-error   (fn [_])}))
+
+(defn- services-ts-memory-monthly-handler
   []
   (ajax/get
     (routes/path-for-backend :services-ts-memory)
@@ -127,6 +147,8 @@
                                :services           true
                                :services-ts-cpu    true
                                :services-ts-memory true
+                               :services-ts-cpu-monthly    true
+                               :services-ts-memory-monthly true
                                :mobile             false}} state/form-state-cursor))
 
 (defn- init-form-value
@@ -136,6 +158,8 @@
                     :services-dashboard []
                     :services-ts-cpu    []
                     :services-ts-memory []
+                    :services-ts-cpu-monthly    []
+                    :services-ts-memory-monthly []
                     :nodes              []
                     :nodes-dashboard    []
                     :nodes-ts           []} state/form-value-cursor))
@@ -150,6 +174,8 @@
       (services-handler)
       (services-ts-cpu-handler)
       (services-ts-memory-handler)
+      (services-ts-cpu-monthly-handler)
+      (services-ts-memory-monthly-handler)
       (me-handler))))
 
 (defn- resource-chip
@@ -308,6 +334,19 @@
       {:className "Swarmpit-table-card-content"}
       (html [:div {:id plot-service-ram-id}]))))
 
+(rum/defc dashboard-service-ram-monthly-stats < rum/static
+                                        {:did-mount    dashboard-service-ram-callback
+                                         :did-update   dashboard-service-ram-callback
+                                         :will-unmount (fn [state] (plot/purge plot-service-ram-id) state)}
+  [services-memory-monthly-ts]
+  (comp/card
+    (if (empty? services-memory-monthly-ts)
+      {:className "Swarmpit-card hide"}
+      {:className "Swarmpit-card"})
+    (comp/card-content
+      {:className "Swarmpit-table-card-content"}
+      (html [:div {:id plot-service-ram-monthly-id}]))))
+
 (defn dashboard-service-cpu-callback
   [state]
   (let [ts (first (:rum/args state))]
@@ -326,11 +365,26 @@
       {:className "Swarmpit-table-card-content"}
       (html [:div {:id plot-service-cpu-id}]))))
 
+(rum/defc dashboard-service-cpu-monthly-stats < rum/static
+                                        {:did-mount    dashboard-service-cpu-callback
+                                         :did-update   dashboard-service-cpu-callback
+                                         :will-unmount (fn [state] (plot/purge plot-service-cpu-id) state)}
+  [services-cpu-monthly-ts]
+  (comp/card
+    (if (empty? services-cpu-monthly-ts)
+      {:className "Swarmpit-card hide"}
+      {:className "Swarmpit-card"})
+    (comp/card-content
+      {:className "Swarmpit-table-card-content"}
+      (html [:div {:id plot-service-cpu-monthly-id}]))))
+
 (rum/defc form-info < rum/static
   [{:keys [stats
            services
            services-ts-cpu
            services-ts-memory
+           services-ts-cpu-monthly
+           services-ts-memory-monthly
            services-dashboard
            nodes
            nodes-ts
@@ -396,6 +450,22 @@
                :lg   6
                :xl   6}
               (dashboard-service-cpu-stats services-ts-cpu))
+            (comp/grid
+              {:item true
+               :xs   12
+               :sm   12
+               :md   12
+               :lg   6
+               :xl   6}
+              (dashboard-service-ram-monthly-stats services-ts-memory-monthly))
+            (comp/grid
+              {:item true
+               :xs   12
+               :sm   12
+               :md   12
+               :lg   6
+               :xl   6}
+              (dashboard-service-cpu-monthly-stats services-ts-cpu-monthly))
             (when (not-empty pinned-nodes)
               (comp/grid
                 {:item true

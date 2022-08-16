@@ -9,14 +9,18 @@
   [user]
   (let [stats (when (stats/ready?) (stats/cluster))
         nodes-ts (when (stats/influx-configured?) (stats/hosts-timeseries-memo))
-        services-ts-cpu (when (stats/influx-configured?) (stats/services-cpu-timeseries-memo))
-        services-ts-memory (when (stats/influx-configured?) (stats/services-memory-timeseries-memo))
+        services-ts-cpu (when (stats/influx-configured?) (stats/services-cpu-timeseries-memo "daily"))
+        services-ts-memory (when (stats/influx-configured?) (stats/services-memory-timeseries-memo "daily"))
+        services-ts-monthly-cpu (when (stats/influx-configured?) (stats/services-cpu-timeseries-memo "monthly"))
+        services-ts-monthly-memory (when (stats/influx-configured?) (stats/services-memory-timeseries-memo "monthly"))
         dashboard-user (api/user-by-username user)]
     {:stats              stats
      :services           (api/services)
      :services-dashboard (:service-dashboard dashboard-user)
      :services-ts-cpu    services-ts-cpu
      :services-ts-memory services-ts-memory
+     :services-ts-monthly-cpu    services-ts-monthly-cpu
+     :services-ts-monthly-memory services-ts-monthly-memory
      :nodes              (api/nodes)
      :nodes-dashboard    (:node-dashboard dashboard-user)
      :nodes-ts           nodes-ts}))

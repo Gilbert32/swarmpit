@@ -188,14 +188,26 @@
 (defn services-ts-cpu
   [_]
   (if (stats/influx-configured?)
-    (->> (stats/services-cpu-timeseries-memo)
+    (->> (stats/services-cpu-timeseries-memo "daily")
+         (resp-ok))
+    (resp-error 400 "Statistics disabled")))
+(defn services-ts-cpu-monthly
+  [_]
+  (if (stats/influx-configured?)
+    (->> (stats/services-cpu-timeseries-memo "monthly")
          (resp-ok))
     (resp-error 400 "Statistics disabled")))
 
 (defn services-ts-memory
   [_]
   (if (stats/influx-configured?)
-    (->> (stats/services-memory-timeseries-memo)
+    (->> (stats/services-memory-timeseries-memo "daily")
+         (resp-ok))
+    (resp-error 400 "Statistics disabled")))
+(defn services-ts-memory-monthly
+  [_]
+  (if (stats/influx-configured?)
+    (->> (stats/services-memory-timeseries-memo "monthly")
          (resp-ok))
     (resp-error 400 "Statistics disabled")))
 

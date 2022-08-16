@@ -51,6 +51,7 @@
   []
   (ic/create-an-hour-rp)
   (ic/create-a-day-rp)
+  (ic/create-a-month-rp)
   (ic/task-cq)
   (ic/host-cq)
   (ic/service-cq)
