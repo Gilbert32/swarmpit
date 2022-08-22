@@ -52,9 +52,12 @@
   (ic/create-an-hour-rp)
   (ic/create-a-day-rp)
   (ic/create-a-month-rp)
-  (ic/task-cq)
-  (ic/host-cq)
-  (ic/service-cq)
+  (ic/task-cq-daily)
+  (ic/host-cq-daily)
+  (ic/service-cq-daily)
+  (ic/task-cq-monthly)
+  (ic/host-cq-monthly)
+  (ic/service-cq-monthly)
   (ic/service-max-usage-cq))
 
 (defn init-couch

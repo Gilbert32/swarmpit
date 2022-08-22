@@ -662,7 +662,7 @@
                                   :description "Statistics disabled"}}
                  #?@(:clj [:handler handler/services-ts-cpu]))}]
     ["/services/ts/cpu/monthly"
-     {:name    :services-ts-monthly-cpu
+     {:name    :services-ts-cpu-monthly
       :swagger {:tags ["service"]}
       :get     (array-map
                  :summary "Services cpu monthly timeseries"

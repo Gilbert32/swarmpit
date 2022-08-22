@@ -21,10 +21,12 @@
 (def plot-node-ram-id "nodeRamStats")
 
 (def plot-service-cpu-id "serviceCpuStats")
+
 (def plot-service-cpu-monthly-id "serviceCpuMonthlyStats")
 
 (def plot-service-ram-id "serviceRamStats")
-(def plot-service-ram-monthly-id "serviceRamStats")
+
+(def plot-service-ram-monthly-id "serviceRamMonthlyStats")
 
 (defn node-cpu-plot [stats-ts]
   (plot/multi plot-node-cpu-id
@@ -60,6 +62,22 @@
               {:title "Memory usage by Service"
                :yaxis {:title "[MiB]"}}))
 
+(defn service-cpu-monthly-plot [tasks-ts]
+  (plot/multi plot-service-cpu-monthly-id
+              tasks-ts
+              :cpu
+              :service
+              {:title "Monthly CPU usage by Service"
+               :yaxis {:title "[vCPU]"}}))
+
+(defn service-ram-monthly-plot [tasks-ts]
+  (plot/multi plot-service-ram-monthly-id
+              tasks-ts
+              :memory
+              :service
+              {:title "Monthly Memory usage by Service"
+               :yaxis {:title "[MiB]"}}))
+
 (defn- stats-handler
   []
   (ajax/get
@@ -81,10 +99,10 @@
 (defn- services-ts-cpu-monthly-handler
   []
   (ajax/get
-    (routes/path-for-backend :services-ts-monthly-cpu)
-    {:state      [:loading? :services-ts-monthly-cpu]
+    (routes/path-for-backend :services-ts-cpu-monthly)
+    {:state      [:loading? :services-ts-cpu-monthly]
      :on-success (fn [{:keys [response]}]
-                   (state/update-value [:services-ts-monthly-cpu] response state/form-value-cursor))
+                   (state/update-value [:services-ts-cpu-monthly] response state/form-value-cursor))
      :on-error   (fn [_])}))
 
 (defn- services-ts-memory-handler
@@ -99,10 +117,10 @@
 (defn- services-ts-memory-monthly-handler
   []
   (ajax/get
-    (routes/path-for-backend :services-ts-memory)
-    {:state      [:loading? :services-ts-memory]
+    (routes/path-for-backend :services-ts-memory-monthly)
+    {:state      [:loading? :services-ts-memory-monthly]
      :on-success (fn [{:keys [response]}]
-                   (state/update-value [:services-ts-memory] response state/form-value-cursor))
+                   (state/update-value [:services-ts-memory-monthly] response state/form-value-cursor))
      :on-error   (fn [_])}))
 
 (defn- nodes-ts-handler
@@ -321,6 +339,12 @@
     (service-ram-plot ts))
   state)
 
+(defn dashboard-service-ram-monthly-callback
+  [state]
+  (let [ts (first (:rum/args state))]
+    (service-ram-monthly-plot ts))
+  state)
+
 (rum/defc dashboard-service-ram-stats < rum/static
                                         {:did-mount    dashboard-service-ram-callback
                                          :did-update   dashboard-service-ram-callback
@@ -335,9 +359,9 @@
       (html [:div {:id plot-service-ram-id}]))))
 
 (rum/defc dashboard-service-ram-monthly-stats < rum/static
-                                        {:did-mount    dashboard-service-ram-callback
-                                         :did-update   dashboard-service-ram-callback
-                                         :will-unmount (fn [state] (plot/purge plot-service-ram-id) state)}
+                                        {:did-mount    dashboard-service-ram-monthly-callback
+                                         :did-update   dashboard-service-ram-monthly-callback
+                                         :will-unmount (fn [state] (plot/purge plot-service-ram-monthly-id) state)}
   [services-memory-monthly-ts]
   (comp/card
     (if (empty? services-memory-monthly-ts)
@@ -351,6 +375,11 @@
   [state]
   (let [ts (first (:rum/args state))]
     (service-cpu-plot ts)) state)
+
+(defn dashboard-service-cpu-monthly-callback
+  [state]
+  (let [ts (first (:rum/args state))]
+    (service-cpu-monthly-plot ts)) state)
 
 (rum/defc dashboard-service-cpu-stats < rum/static
                                         {:did-mount    dashboard-service-cpu-callback
@@ -366,9 +395,9 @@
       (html [:div {:id plot-service-cpu-id}]))))
 
 (rum/defc dashboard-service-cpu-monthly-stats < rum/static
-                                        {:did-mount    dashboard-service-cpu-callback
-                                         :did-update   dashboard-service-cpu-callback
-                                         :will-unmount (fn [state] (plot/purge plot-service-cpu-id) state)}
+                                        {:did-mount    dashboard-service-cpu-monthly-callback
+                                         :did-update   dashboard-service-cpu-monthly-callback
+                                         :will-unmount (fn [state] (plot/purge plot-service-cpu-monthly-id) state)}
   [services-cpu-monthly-ts]
   (comp/card
     (if (empty? services-cpu-monthly-ts)

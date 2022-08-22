@@ -168,8 +168,8 @@
   (let [services-max-usage (services-max-usage-memo)]
     (services-timeseries services-max-usage :memory t)))
 
-(defn services-cpu-timeseries-memo [t] (memo/ttl services-cpu-timeseries t :ttl/threshold 60000))
-(defn services-memory-timeseries-memo [t] (memo/ttl services-memory-timeseries t :ttl/threshold 60000))
+(def services-cpu-timeseries-memo (memo/ttl services-cpu-timeseries :ttl/threshold 60000))
+(def services-memory-timeseries-memo (memo/ttl services-memory-timeseries :ttl/threshold 60000))
 
 (defn hosts-timeseries
   "Get hosts timeseries data for last 24 hours"

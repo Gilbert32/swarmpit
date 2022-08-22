@@ -82,7 +82,7 @@
 
 ;; Continuous Queries
 
-(defn task-cq
+(defn task-cq-daily
   []
   (manage-doc
     "CREATE CONTINUOUS QUERY cq_tasks_1m ON swarmpit
@@ -95,7 +95,7 @@
        GROUP BY time(1m), task, service
      END"))
 
-(defn service-cq
+(defn service-cq-daily
   "Warning: Dependant on [cq_tasks_1m]"
   []
   (manage-doc
@@ -107,6 +107,32 @@
        INTO a_day.downsampled_services
        FROM swarmpit.a_day.downsampled_tasks
        GROUP BY time(1m), service
+     END"))
+(defn task-cq-monthly
+  []
+  (manage-doc
+    "CREATE CONTINUOUS QUERY cq_tasks_30d ON swarmpit
+     BEGIN
+       SELECT
+        MAX(cpuUsage) / 100 as cpu,
+        MAX(memoryUsed) as memory
+       INTO a_month.downsampled_tasks
+       FROM swarmpit..task_stats
+       GROUP BY time(15m), task, service
+     END"))
+
+(defn service-cq-monthly
+  "Warning: Dependant on [cq_tasks_30d]"
+  []
+  (manage-doc
+    "CREATE CONTINUOUS QUERY cq_services_30d ON swarmpit
+     BEGIN
+       SELECT
+        SUM(cpu) as cpu,
+        SUM(memory) as memory
+       INTO a_month.downsampled_services
+       FROM swarmpit.a_month.downsampled_tasks
+       GROUP BY time(15m), service
      END"))
 
 (defn service-max-usage-cq
@@ -123,7 +149,7 @@
        GROUP BY time(30m), service
      END"))
 
-(defn host-cq
+(defn host-cq-daily
   []
   (manage-doc
     "CREATE CONTINUOUS QUERY cq_hosts_1m ON swarmpit
@@ -134,6 +160,18 @@
        INTO a_day.downsampled_hosts
        FROM swarmpit..host_stats
        GROUP BY time(1m), host
+     END"))
+(defn host-cq-monthly
+  []
+  (manage-doc
+    "CREATE CONTINUOUS QUERY cq_hosts_30d ON swarmpit
+     BEGIN
+       SELECT
+        MAX(cpuUsage) as cpu,
+        MAX(memoryUsage) as memory
+       INTO a_month.downsampled_hosts
+       FROM swarmpit..host_stats
+       GROUP BY time(15m), host
      END"))
 
 (defn drop-continuous-queries
